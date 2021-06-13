@@ -45,7 +45,7 @@ public:
     }
 };
 
-
+// FSM for identifier and integer tokens
 int DFSM[6][3] = {
     /*
     l = letters
@@ -140,20 +140,17 @@ int tokenizer(char currChar, int currState)
     }
     else
     {
-        //cout << "Others" << endl;
         for (int i = 0; i <= 8; i++)
         {
             // check for separators
             if (currChar == separators[i])
             {
-                //cout << "Seperator" << endl;
-                //cout << "Current State: " << currentState << endl;
                 currentState = DFSM[currentState][2];
-                //cout << "New State: " << currentState << endl;
-                if (buffer.size() != 0)
-                    print(currState);
-                buffer.push_back(currChar);
 
+                if (buffer.size() != 0) // Terminate and print the token if it exists
+                    print(currState);
+                // Push and print separator
+                buffer.push_back(currChar);
                 cout << "Separator         ";
                 outFile << "Separator         ";
                 print(currentState);
@@ -165,12 +162,11 @@ int tokenizer(char currChar, int currState)
             // check for operators
             if (currChar == operators[i])
             {
-                //cout << "Operator" << endl;
-                //cout << "Current State: " << currentState << endl;
                 currentState = DFSM[currentState][2];
-                //cout << "New State: " << currentState << endl;
-                if (buffer.size() != 0)
+
+                if (buffer.size() != 0) // Terminate and print token if it exists
                     print(currState);
+
                 buffer.push_back(currChar);
                 // check for relational operators /= and ==
                 if ((currChar == '/' || currChar == '=') && inFile.peek() == '=') {
@@ -184,7 +180,7 @@ int tokenizer(char currChar, int currState)
                     inFile.get(c);
                     buffer.push_back(c);
                 }
-
+                // Print operator
                 cout << "Operator          ";
                 outFile << "Operator          ";
                 print(currentState);
@@ -196,23 +192,26 @@ int tokenizer(char currChar, int currState)
     return 0;
 }
 
+// outputs token and lexeme
 void print(int state) {
-    //prints the entire buffer and writes it to token.txt
     if (state == 1 || state == 2 || state == 3) {
+        // Print Keyword label if true
         if (isKeyword()) {
             cout << "Keyword           ";
             outFile << "Keyword           ";
         }
+        // Print Indentier label
         else {
-            cout << "Identifier        ";
-            outFile << "Identifier        ";
+        cout << "Identifier        ";
+        outFile << "Identifier        ";
         }
     }
+    // Print Integer label if true
     else if (state == 4) {
         cout << "Integer           ";
         outFile << "Integer           ";
     }
-
+    // Print the entire token buffer
     for (vector<char>::iterator it = buffer.begin(); it != buffer.end(); ++it) {
         cout << *it;
         outFile << *it;
@@ -222,6 +221,7 @@ void print(int state) {
     buffer.clear();
 }
 
+// check to see if identifier is actually a keyword
 bool isKeyword() {
     string s;
     for (vector<char>::iterator it = buffer.begin(); it != buffer.end(); ++it) {
