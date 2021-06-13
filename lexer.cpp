@@ -6,14 +6,15 @@ using namespace std;
 
 char separators[] = { '(', ')', '[', ']', '{', '}', ',', ':', ';' };
 char operators[] = { '*', '+', '-', '=', '/', '>', '<', '%' };
-string keywords[13] = { "int", "float", "bool", "true", "false", "if", "else", "while", "put", "get", "begin", "end", "endif" };
+string keywords[13] = { "integer", "float", "boolean", "true", "false", "if", "else", "while", "put", "get", "begin", "end", "endif" };
 
 vector<char> buffer;
 ifstream inFile;
 ofstream outFile;
 
 int tokenizer(char currChar, int currState);
-void print();
+void print(int state);
+bool isKeyword();
 
 // Record Class
 class record
@@ -67,7 +68,7 @@ int main(int argc, char* argv[])
     int currentState = 0;
 
     inFile.open(argv[1]);
-    outFile.open("Tokens.txt");
+    outFile.open(argv[2]);
 
     //checks if file opens correctly
     if (!inFile)
@@ -75,6 +76,9 @@ int main(int argc, char* argv[])
         cout << "error\n";
         exit(1);
     }
+
+    cout << "Tokens            Lexemes\n" << endl;
+    outFile << "Tokens            Lexemes\n" << endl;
 
     while (inFile.get(character))
     {
@@ -94,61 +98,96 @@ int tokenizer(char currChar, int currState)
 {
     int currentState = currState;
 
+    //Check if it's a comment
+    if (currChar == '/' && inFile.peek() == '*') {
+        char c;
+        inFile.ignore();
+        do {
+            inFile.ignore(256, '*');
+            inFile.get(c);
+        } while (c != '/');
+        return 0;
+    }
+    // If character is a letter, check first column of states
     if (isalpha(currChar))
     {
-        cout << "Alpha" << endl;
-        cout << "Current State: " << currentState << endl;
+        //cout << "Alpha" << endl;
+        //cout << "Current State: " << currentState << endl;
         currentState = DFSM[currentState][0];
-        cout << "New State: " << currentState << endl;
+        //cout << "New State: " << currentState << endl;
         buffer.push_back(currChar);
         return currentState;
     }
     // If character is a digit, check second column of states
     else if (isdigit(currChar))
     {
-        cout << "Digit" << endl;
-        cout << "Current State: " << currentState << endl;
+        //cout << "Digit" << endl;
+        //cout << "Current State: " << currentState << endl;
         currentState = DFSM[currentState][1];
-        cout << "New State: " << currentState << endl;
+        //cout << "New State: " << currentState << endl;
         buffer.push_back(currChar);
         return currentState;
     }
     else if (isspace(currChar))
     {
-        cout << "Space" << endl;
-        cout << "Current State: " << currentState << endl;
+        //cout << "Space" << endl;
+        //cout << "Current State: " << currentState << endl;
         currentState = DFSM[currentState][2];
-        cout << "New State: " << currentState << endl;
+        //cout << "New State: " << currentState << endl;
         if (buffer.size() != 0)
-            print();
+            print(currState);
         return currentState;
     }
     else
     {
-        cout << "Others" << endl;
-        for (int i = 0; i < 8; i++)
+        //cout << "Others" << endl;
+        for (int i = 0; i <= 8; i++)
         {
+            // check for separators
             if (currChar == separators[i])
             {
-                cout << "Seperator" << endl;
-                cout << "Current State: " << currentState << endl;
+                //cout << "Seperator" << endl;
+                //cout << "Current State: " << currentState << endl;
                 currentState = DFSM[currentState][2];
-                cout << "New State: " << currentState << endl;
+                //cout << "New State: " << currentState << endl;
                 if (buffer.size() != 0)
-                    print();
+                    print(currState);
+                buffer.push_back(currChar);
+
+                cout << "Separator         ";
+                outFile << "Separator         ";
+                print(currentState);
                 return currentState;
             }
         }
-        for (int i = 0; i < 7; i++)
+        for (int i = 0; i <= 7; i++)
         {
+            // check for operators
             if (currChar == operators[i])
             {
-                cout << "Operator" << endl;
-                cout << "Current State: " << currentState << endl;
+                //cout << "Operator" << endl;
+                //cout << "Current State: " << currentState << endl;
                 currentState = DFSM[currentState][2];
-                cout << "New State: " << currentState << endl;
+                //cout << "New State: " << currentState << endl;
                 if (buffer.size() != 0)
-                    print();
+                    print(currState);
+                buffer.push_back(currChar);
+                // check for relational operators /= and ==
+                if ((currChar == '/' || currChar == '=') && inFile.peek() == '=') {
+                    char c;
+                    inFile.get(c);
+                    buffer.push_back(c);
+                }
+                // check for program starter %%
+                if (currChar == '%' && inFile.peek() == '%') {
+                    char c;
+                    inFile.get(c);
+                    buffer.push_back(c);
+                }
+
+                cout << "Operator          ";
+                outFile << "Operator          ";
+                print(currentState);
                 return currentState;
             }
         }
@@ -157,12 +196,40 @@ int tokenizer(char currChar, int currState)
     return 0;
 }
 
-void print() {
+void print(int state) {
     //prints the entire buffer and writes it to token.txt
+    if (state == 1 || state == 2 || state == 3) {
+        if (isKeyword()) {
+            cout << "Keyword           ";
+            outFile << "Keyword           ";
+        }
+        else {
+            cout << "Identifier        ";
+            outFile << "Identifier        ";
+        }
+    }
+    else if (state == 4) {
+        cout << "Integer           ";
+        outFile << "Integer           ";
+    }
+
     for (vector<char>::iterator it = buffer.begin(); it != buffer.end(); ++it) {
         cout << *it;
         outFile << *it;
     }
+    cout << endl;
     outFile << endl;
     buffer.clear();
+}
+
+bool isKeyword() {
+    string s;
+    for (vector<char>::iterator it = buffer.begin(); it != buffer.end(); ++it) {
+        s.push_back(*it);
+    }
+    for (int i = 0; i <= 12; i++) {
+        if (s == keywords[i])
+            return true;
+    }
+    return false;
 }
