@@ -1,4 +1,4 @@
-/* this program determines if integer n is a prime number */
+/* this program determines if variable numb3r is a prime number */
 
 %%
 /* declarations */
