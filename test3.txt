@@ -1,0 +1,26 @@
+/* this program determines if integer n is a prime number */
+
+%%
+/* declarations */
+integer numb3r;
+integer i = 0;
+boolean isPrime;
+
+/* initialize a number */
+numb3r = 13;
+isPrime = true;
+
+/* 1 is not prime */
+if (numb3r == 1)
+	isPrime = false;
+else
+	i = 1;
+	while (i < numb3r / 2)
+	begin
+		if (numb3r % i == 0)
+			isPrime = false;
+		endif
+		i = i + 1;
+	end
+endif
+%%
