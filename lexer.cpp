@@ -83,8 +83,6 @@ int main(int argc, char* argv[])
     while (inFile.get(character))
     {
         currentState = tokenizer(character, currentState);
-        if (currentState == 5)
-            currentState = 0;
     }
 
     inFile.close();
@@ -98,7 +96,7 @@ int tokenizer(char currChar, int currState)
 {
     int currentState = currState;
 
-    //Check if it's a comment
+    //Check if it's a /**/ comment
     if (currChar == '/' && inFile.peek() == '*') {
         char c;
         inFile.ignore();
@@ -111,31 +109,24 @@ int tokenizer(char currChar, int currState)
     // If character is a letter, check first column of states
     if (isalpha(currChar))
     {
-        //cout << "Alpha" << endl;
-        //cout << "Current State: " << currentState << endl;
         currentState = DFSM[currentState][0];
-        //cout << "New State: " << currentState << endl;
         buffer.push_back(currChar);
         return currentState;
     }
     // If character is a digit, check second column of states
     else if (isdigit(currChar))
     {
-        //cout << "Digit" << endl;
-        //cout << "Current State: " << currentState << endl;
         currentState = DFSM[currentState][1];
-        //cout << "New State: " << currentState << endl;
         buffer.push_back(currChar);
         return currentState;
     }
     else if (isspace(currChar))
     {
-        //cout << "Space" << endl;
-        //cout << "Current State: " << currentState << endl;
         currentState = DFSM[currentState][2];
-        //cout << "New State: " << currentState << endl;
         if (buffer.size() != 0)
             print(currState);
+        currentState = 0;
+
         return currentState;
     }
     else
@@ -149,11 +140,14 @@ int tokenizer(char currChar, int currState)
 
                 if (buffer.size() != 0) // Terminate and print the token if it exists
                     print(currState);
+
                 // Push and print separator
                 buffer.push_back(currChar);
                 cout << "Separator         ";
                 outFile << "Separator         ";
+                currentState = 0;
                 print(currentState);
+
                 return currentState;
             }
         }
@@ -183,7 +177,9 @@ int tokenizer(char currChar, int currState)
                 // Print operator
                 cout << "Operator          ";
                 outFile << "Operator          ";
+                currentState = 0;
                 print(currentState);
+
                 return currentState;
             }
         }
@@ -202,8 +198,8 @@ void print(int state) {
         }
         // Print Indentier label
         else {
-        cout << "Identifier        ";
-        outFile << "Identifier        ";
+            cout << "Identifier        ";
+            outFile << "Identifier        ";
         }
     }
     // Print Integer label if true
@@ -211,6 +207,11 @@ void print(int state) {
         cout << "Integer           ";
         outFile << "Integer           ";
     }
+    else if (state == 5) {
+        cout << "NOT ACCEPTED   X  ";
+        outFile << "NOT ACCEPTED   X  ";
+    }
+
     // Print the entire token buffer
     for (vector<char>::iterator it = buffer.begin(); it != buffer.end(); ++it) {
         cout << *it;
@@ -223,10 +224,12 @@ void print(int state) {
 
 // check to see if identifier is actually a keyword
 bool isKeyword() {
+    // Convert char buffer into type string
     string s;
     for (vector<char>::iterator it = buffer.begin(); it != buffer.end(); ++it) {
         s.push_back(*it);
     }
+    // Compare new string against keyword list
     for (int i = 0; i <= 12; i++) {
         if (s == keywords[i])
             return true;
