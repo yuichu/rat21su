@@ -167,6 +167,12 @@ int tokenizer(char currChar, int currState)
                     char c;
                     inFile.get(c);
                     buffer.push_back(c);
+                    // Print separator
+                    cout << "Separator         ";
+                    outFile << "Separator         ";
+                    currentState = 0;
+                    print(currentState);
+                    return currentState;
                 }
                 // check for program starter %%
                 if (currChar == '%' && inFile.peek() == '%') {
