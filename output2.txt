@@ -17,7 +17,7 @@ Separator         ;
 Keyword           while
 Separator         (
 Identifier        number
-Operator          /=
+Separator         /=
 Integer           0
 Separator         )
 Keyword           begin

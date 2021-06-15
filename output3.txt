@@ -23,7 +23,7 @@ Separator         ;
 Keyword           if
 Separator         (
 Identifier        numb3r
-Operator          ==
+Separator         ==
 Integer           1
 Separator         )
 Identifier        isPrime
@@ -49,7 +49,7 @@ Separator         (
 Identifier        numb3r
 Operator          %
 Identifier        i
-Operator          ==
+Separator         ==
 Integer           0
 Separator         )
 Identifier        isPrime
