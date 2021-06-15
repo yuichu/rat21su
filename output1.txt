@@ -1,6 +1,6 @@
 Tokens            Lexemes
 
-Operator          %%
+Separator         %%
 Keyword           integer
 Identifier        a
 Separator         ;
@@ -30,4 +30,4 @@ Identifier        b
 Operator          =
 Identifier        temp
 Separator         ;
-Operator          %%
+Separator         %%

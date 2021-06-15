@@ -1,6 +1,6 @@
 Tokens            Lexemes
 
-Operator          %%
+Separator         %%
 Keyword           integer
 Identifier        number
 Separator         ;
@@ -17,7 +17,7 @@ Separator         ;
 Keyword           while
 Separator         (
 Identifier        number
-Separator         /=
+Operator          /=
 Integer           0
 Separator         )
 Keyword           begin
@@ -42,4 +42,4 @@ Operator          /
 Integer           10
 Separator         ;
 Keyword           end
-Operator          %%
+Separator         %%
