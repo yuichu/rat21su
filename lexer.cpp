@@ -13,10 +13,12 @@ ifstream inFile;
 ofstream outFile;
 
 int tokenizer(char currChar, int currState);
+// print(int state) -> prints token and lexeme
 void print(int state);
+void production_print();
 bool isKeyword();
 
-// Record Class
+// Record Class ** WORK IN PROGRESS **
 class record
 {
 private:
@@ -241,4 +243,139 @@ bool isKeyword() {
             return true;
     }
     return false;
+}
+
+
+
+
+
+//--------------------------------------------------------------------------
+// Following are functions for each production rule.
+// Each function will begin with r_ to indicate that it's a production rule.
+// Please see documentation for the production rule list.
+//--------------------------------------------------------------------------
+
+// Rule 1: <Rat21SU> ::= %% <Opt Declaration List> <Statement List> %%
+void r_rat21Su() {
+    return;
+}
+
+// Rule 2: <Opt Declaration List> ::= <Declaration List>  |  <Empty>
+void r_optDeclarationList() {
+    return;
+}
+
+// Rule 3: <Declaration List> ::= <Declaration> ; <Declaration List P>
+void r_declarationList(){
+    return;
+}
+
+// Rule 21: <Declaration List P> ::= <Declaration List>  |  <Empty>
+void r_declarationListP(){
+    return;
+}
+
+// Rule 4: <Declaration> ::= <Qualifier> <identifier> 
+void r_declaration(){
+    return;
+}
+
+// Rule 5: <Qualifier> ::= integer  |  boolean
+void r_qualifier(){
+    return;
+}
+
+// Rule 6: <Statement List> ::= <Statement> <Statement List P>
+void r_statementList(){
+    return;
+}
+
+// Rule 22: <Statement List P> ::= <Statement List>  |  <Empty>
+void r_statementListP(){
+    return;
+}
+
+// Rule 7: <Statement> ::= <Compound>  |  <Assign>  |  <If>  |  <Get>  |  <Put>  |  <While>
+void r_statement(){
+    return;
+}
+
+// Rule 8: <Compound> ::= begin <Statement List> end
+void r_compound(){
+    return;
+}
+
+// Rule 9: <Assign> ::= <Identifier> = <Expression> ;
+void r_assign(){
+    return;
+}
+
+// Rule 10: <If> ::= if ( <Condition> ) <Statement> <If P>
+void r_if(){
+    return;
+}
+
+// Rule 23: <If P> ::= endif  |  else <Statement> endif
+void r_ifP(){
+    return;
+}
+
+// Rule 11: <Put> ::= put ( <identifier> );
+void r_put(){
+    return;
+}
+
+// Rule 12: <Get> ::= get ( <Identifier> );
+void r_get(){
+    return;
+}
+
+// Rule 13: <While> ::= while ( <Condition> ) <Statement>  
+void r_while(){
+    return;
+}
+
+// Rule 14: <Condition> ::= <Expression> <Relop> <Expression>
+void r_condition(){
+    return;
+}
+
+// Rule 15: <Relop> ::= ==  |  >  |  <  |  /=    
+void r_relop(){
+    return;
+}
+
+// Rule 16: <Expression> ::= <Term> <Expression P>
+void r_expression(){
+    return;
+}
+
+// Rule 24: <Expression P> ::= + <Term> <Expression P>  |  - <Term> <Expression P>  |  <Empty>
+void r_expressionP(){
+    return;
+}
+
+// Rule 17: <Term> ::= <Factor> <Term P>
+void r_term(){
+    return;
+}
+
+// Rule 25: <Term P> ::= * <Factor> <Term P>   |   / <Factor> <Term P>   |   <Empty>
+void r_termP(){
+    return;
+}
+
+// Rule 18: <Factor> ::= -  <Primary>  |  <Primary>
+void r_factor(){
+    return;
+}
+
+// Rule 19: <Primary> ::= <Identifier>  |  <Integer>  |  ( <Expression> )   |  true   |  false   
+void r_primary(){
+    return;
+}
+
+// Rule 20: <Empty> ::= ε
+void r_empty(){
+    return;
 }
