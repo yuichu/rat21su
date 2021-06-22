@@ -79,8 +79,8 @@ int main(int argc, char *argv[])
     char character;
     int currentState = 0;
 
-    inFile.open("test1.txt");
-    outFile.open("output1.txt");
+    inFile.open(argv[1]);
+    outFile.open(argv[2]);
 
     //checks if file opens correctly
     if (!inFile)
