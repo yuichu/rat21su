@@ -5,7 +5,7 @@
 using namespace std;
 
 char separators[] = { '(', ')', '[', ']', '{', '}', ',', ':', ';' };
-char operators[] = { '*', '+', '-', '=', '/', '>', '<', '%' };
+char operators[] = { '*', '+', '-', '=', '/', '>', '<', '%', '|' };
 string keywords[13] = { "integer", "float", "boolean", "true", "false", "if", "else", "while", "put", "get", "begin", "end", "endif" };
 
 vector<char> buffer;
@@ -153,7 +153,7 @@ int tokenizer(char currChar, int currState)
                 return currentState;
             }
         }
-        for (int i = 0; i <= 7; i++)
+        for (int i = 0; i <= 8; i++)
         {
             // check for operators
             if (currChar == operators[i])
@@ -191,6 +191,9 @@ int tokenizer(char currChar, int currState)
                 return currentState;
             }
         }
+        buffer.push_back(currChar);
+        currentState = DFSM[currentState][2];
+        print(currentState);
     }
 
     return 0;
