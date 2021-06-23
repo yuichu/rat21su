@@ -303,9 +303,15 @@ void r_rat21Su() {
     }
     else {
         //error: Expected %%
+        cout << "Rule 1 Error: expected %%\n";
     }
-    if (lexeme != "%%") {
+    if (lexeme == "%%") {
+        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 1\n";
+        inFile >> token >> lexeme;
+    }
+    else {
         //error: Expected %%
+        cout << "Rule 1 Error: expected %%\n";
     }
 }
 
@@ -325,6 +331,7 @@ void r_declarationList() {
     }
     else {
         //error: Expected ';'
+        cout << "Rule 3 Error: expected ;\n";
     }
     r_declarationListP();
 }
@@ -345,6 +352,7 @@ void r_declaration() {
     }
     else {
         // error: Expected id
+        cout << "Rule 4 Error: expected id\n";
     }
     return;
 }
@@ -358,6 +366,7 @@ void r_qualifier() {
     }
     else {
         // error
+        cout << "Rule 5 Error: expected integer or boolean\n";
     }
     return;
 }
@@ -367,8 +376,8 @@ void r_statementList() {
     if (lexeme != "%%") {
         r_statement();
         r_statementListP();
-        return;
     }
+    return;
 }
 
 // Rule 22: <Statement List P> ::= <Statement List>  |  %%
@@ -399,6 +408,11 @@ void r_statement() {
     else if (lexeme == "while") {
         r_while();
     }
+    else if (lexeme == "end") {
+        // print token and lexeme
+        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 8\n";
+        inFile >> token >> lexeme;
+    }
     else {
         cout << "No valid statement found for: " << token << " " << lexeme << "\n";
         exit(EXIT_FAILURE);
@@ -412,20 +426,12 @@ void r_compound() {
         // print token and lexeme
         cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 8\n";
         inFile >> token >> lexeme;
-
         r_statementList();
-
-        if (lexeme == "end") {
-            // print token and lexeme
-            cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 8\n";
-            inFile >> token >> lexeme;
-        }
-        else {
-            // error
-        }
     }
+    
     else {
         // error
+        cout << "Rule 8 Error: expected begin\n";
     }
 
     return;
@@ -433,7 +439,7 @@ void r_compound() {
 
 // Rule 9: <Assign> ::= <Identifier> = <Expression> ;
 void r_assign() {
-    if (token == "identifier") {
+    if (token == "Identifier") {
         // print token and lexeme
         cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 9\n";
         inFile >> token >> lexeme;
@@ -452,14 +458,17 @@ void r_assign() {
             }
             else {
                 // error
+                cout << "Rule 9 Error: expected ;\n";
             }
         }
         else {
             // error
+            cout << "Rule 9 Error: expected =\n";
         }
     }
     else {
         //error
+        cout << "Rule 9 Error: expected id\n";
     }
     return;
 }
@@ -488,14 +497,17 @@ void r_if() {
             }
             else {
                 // error on ')'
+                cout << "Rule 10 Error: expected )\n";
             }
         }
         else {
             // error on '('
+            cout << "Rule 10 Error: expected (\n";
         }
     }
     else {
         // error on "if"
+        cout << "Rule 10 Error: expected if\n";
     }
     return;
 }
@@ -517,11 +529,14 @@ void r_ifP() {
             }
             else {
                 // error
+                cout << "Rule 23 Error: expected endif\n";
             }
         }
     }
     else {
         // error
+        cout << "Rule 23 Error: expected endif or else\n";
+
     }
     return;
 }
@@ -538,7 +553,7 @@ void r_put() {
             cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 11\n";
             inFile >> token >> lexeme;
 
-            if (token == "identifier") {
+            if (token == "Identifier") {
                 // print token and lexeme
                 cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 11\n";
                 inFile >> token >> lexeme;
@@ -555,22 +570,27 @@ void r_put() {
                     }
                     else {
                         // error for ';'
+                        cout << "Rule 11 Error: expected ;\n";
                     }
                 }
                 else {
                     // error for ')'
+                    cout << "Rule 11 Error: expected )\n";
                 }
             }
             else {
                 // error for identifier
+                cout << "Rule 11 Error: expected id\n";
             }
         }
         else {
             // error for '('
+            cout << "Rule 11 Error: expected (\n";
         }
     }
     else {
         // error for "put"
+        cout << "Rule 11 Error: expected put\n";
     }
     return;
 }
@@ -587,7 +607,7 @@ void r_get() {
             cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 12\n";
             inFile >> token >> lexeme;
 
-            if (token == "identifier") {
+            if (token == "Identifier") {
                 // print token and lexeme
                 cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 12\n";
                 inFile >> token >> lexeme;
@@ -604,22 +624,27 @@ void r_get() {
                     }
                     else {
                         // error for ';'
+                        cout << "Rule 12 Error: expected ;\n";
                     }
                 }
                 else {
                     // error for ')'
+                    cout << "Rule 12 Error: expected )\n";
                 }
             }
             else {
                 // error for identifier
+                cout << "Rule 12 Error: expected id\n";
             }
         }
         else {
             // error for '('
+            cout << "Rule 12 Error: expected (\n";
         }
     }
     else {
         // error for "get"
+        cout << "Rule 12 Error: expected get\n";
     }
     return;
 }
@@ -647,14 +672,17 @@ void r_while() {
             }
             else {
                 // error for ')'
+                cout << "Rule 13 Error: expected )\n";
             }
         }
         else {
             // error for "("
+            cout << "Rule 13 Error: expected (\n";
         }
     }
     else {
         // error for "while"
+        cout << "Rule 13 Error: expected while\n";
     }
     return;
 }
@@ -676,6 +704,7 @@ void r_relop() {
     }
     else {
         // error
+        cout << "Rule 15 Error: expected ==, >, <, or /=\n";
     }
     return;
 }
@@ -697,9 +726,6 @@ void r_expressionP() {
         r_term();
         r_expressionP();
     }
-    else {
-        // empty or error
-    }
     return;
 }
 
@@ -720,9 +746,6 @@ void r_termP() {
         r_factor();
         r_termP();
     }
-    else {
-        // empty or error
-    }
     return;
 }
 
@@ -735,11 +758,12 @@ void r_factor() {
 
         r_primary();
     }
-    else if (token == "Identifier" || token == "Keyword" || token == "Separator") {
+    else if (token == "Identifier" || token == "Integer" || token == "Keyword" || token == "Separator") {
         r_primary();
     }
     else {
         // error
+        cout << "Rule 18 Error: expected -, id, int, keyword, or sep\n";
     }
 
     return;
@@ -747,12 +771,7 @@ void r_factor() {
 
 // Rule 19: <Primary> ::= <Identifier>  |  <Integer>  |  ( <Expression> )   |  true   |  false   
 void r_primary() {
-    if (token == "Identifier") {
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 19\n";
-        inFile >> token >> lexeme;
-    }
-    else if (lexeme == "integer" || lexeme == "true" || lexeme == "false") {
+    if (token == "Identifier" || token == "Integer" || lexeme == "true" || lexeme == "false") {
         // print token and lexeme
         cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 19\n";
         inFile >> token >> lexeme;
@@ -772,6 +791,7 @@ void r_primary() {
     }
     else {
         //error
+        cout << "Rule 19 Error: expected id, int, bool, (, )\n";
     }
     return;
 }
