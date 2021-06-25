@@ -320,28 +320,29 @@ void r_rat21Su() {
     else {
         //error: Expected %%
         cout << "Rule 1 Error: expected %%\n";
+        exit(EXIT_FAILURE);
     }
-    if (lexeme == "%%") {
-        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 1\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        inFile >> token >> lexeme;
+
+    if (lexeme != "%%") {
+        //error: Expected %%
+        cout << "Rule 1 Error: expected final %%\n";
+        exit(EXIT_FAILURE);
     }
     else {
-        //error: Expected %%
-        cout << "Rule 1 Error: expected %%\n";
-        outFile << "Rule 1 Error: expected %%\n";
+        cout << "\n------- End of Rat21SU -------\n";
     }
     return;
 }
 
 // Rule 2: <Opt Declaration List> ::= <Declaration List>  |  <Empty>
 void r_optDeclarationList() {
+    if (printRule) {
+        // print production rule
+        cout << "\t <Opt Declaration List> ::= <Declaration List>  |  <Empty>" << "\n";
+        outFile << "\t <Opt Declaration List> ::= <Declaration List>  |  <Empty>" << "\n";
+    }
     if (lexeme != "%%" && !inFile.eof() && (lexeme == "integer" || lexeme == "boolean")) {
-        if (printRule) {
-            // print production rule
-            cout << "\t <Opt Declaration List> ::= <Declaration List>" << "\n";
-            outFile << "\t <Opt Declaration List> ::= <Declaration List>" << "\n";
-        }
+
         r_declarationList();
     }
     else {
@@ -352,38 +353,43 @@ void r_optDeclarationList() {
 
 // Rule 3: <Declaration List> ::= <Declaration> ; <Declaration List P>
 void r_declarationList() {
-    cout << "\t <Declaration List> ::= <Declaration> ; <Declaration List P>" << "\n";
-    outFile << "\t <Declaration List> ::= <Declaration> ; <Declaration List P>" << "\n";
+    if (printRule) {
+        // print production rule
+        cout << "\t <Declaration List> ::= <Declaration> ; <Declaration List P>" << "\n";
+        outFile << "\t <Declaration List> ::= <Declaration> ; <Declaration List P>" << "\n";
+    }
     r_declaration();
     if (lexeme == ";") {
-        if (printRule) {
-            // print production rule
-            cout << "\t <Declaration List P> ::= <Declaration List>  |  <Empty>" << "\n";
-            outFile << "\t <Declaration List P> ::= <Declaration List>  |  <Empty>" << "\n";
-        }
         inFile >> token >> lexeme;
+        // print token and lexeme
+        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 3\n";
+        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
         r_declarationListP();
     }
     else {
         //error: Expected ';'
         cout << "Rule 3 Error: expected ;\n";
         outFile << "Rule 3 Error: expected ;\n";
+        exit(EXIT_FAILURE);
     }
 }
 
 // Rule 21: <Declaration List P> ::= <Declaration List>  |  <Empty>
 void r_declarationListP() {
+    if (printRule) {
+        // print production rule
+        cout << "\t <Declaration List P> ::= <Declaration List>  |  <Empty>" << "\n";
+        outFile << "\t <Declaration List P> ::= <Declaration List>  |  <Empty>" << "\n";
+    }
     if (lexeme != "%%" && !inFile.eof() && (lexeme == "integer" || lexeme == "boolean")) {
-        if (printRule) {
-            // print production rule
-            cout << "\t <Declaration List P> ::= <Declaration List>" << "\n";
-            outFile << "\t <Declaration List P> ::= <Declaration List>" << "\n";
-        }
         r_declarationList();
     }
     else {
-        cout << "\t <Declaration List P> ::= <Empty>" << "\n";
-        outFile << "\t <Declaration List P> ::= <Empty>" << "\n";
+        if (printRule) {
+            // print production rule
+            cout << "\t <Declaration List P> ::= <Empty>" << "\n";
+            outFile << "\t <Declaration List P> ::= <Empty>" << "\n";
+        }
     }
 }
 
@@ -409,6 +415,7 @@ void r_declaration() {
         // error: Expected id
         cout << "Rule 4 Error: expected id\n";
         outFile << "Rule 4 Error: expected id\n";
+        exit(EXIT_FAILURE);
     }
     return;
 }
@@ -432,6 +439,7 @@ void r_qualifier() {
         // error
         cout << "Rule 5 Error: expected integer or boolean\n";
         outFile << "Rule 5 Error: expected integer or boolean\n";
+        exit(EXIT_FAILURE);
     }
     return;
 }
@@ -461,17 +469,17 @@ void r_statementListP() {
         r_statementList();
     }
     else {
-        cout << "\t <Statement List P> ::= <Empty>" << "\n";
-        outFile << "\t <Statement List P> ::= <Empty>" << "\n";
+        if (printRule) {
+            // print production rule
+            cout << "\t <Statement List P> ::= <Empty>" << "\n";
+            outFile << "\t <Statement List P> ::= <Empty>" << "\n";
+        }
     }
 }
 
 // Rule 7: <Statement> ::= <Compound>  |  <Assign>  |  <If>  |  <Get>  |  <Put>  |  <While>
 void r_statement() {
     if (lexeme == "begin") {
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 8\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
         if (printRule) {
             // print production rule
             cout << "\t <Statement> ::= <Compound>" << "\n";
@@ -480,9 +488,6 @@ void r_statement() {
         r_compound();
     }
     else if (token == "Identifier") {
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 9\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
         if (printRule) {
             // print production rule
             cout << "\t <Statement> ::= <Assign>" << "\n";
@@ -491,9 +496,6 @@ void r_statement() {
         r_assign();
     }
     else if (lexeme == "if") {
-        // print token and lexeme for 'if'
-        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 10\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
         if (printRule) {
             // print production rule
             cout << "\t <Statement> ::= <If>" << "\n";
@@ -502,9 +504,6 @@ void r_statement() {
         r_if();
     }
     else if (lexeme == "put") {
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 11\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
         if (printRule) {
             // print production rule
             cout << "\t <Statement> ::= <Put>" << "\n";
@@ -513,9 +512,6 @@ void r_statement() {
         r_put();
     }
     else if (lexeme == "get") {
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 12\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
         if (printRule) {
             // print production rule
             cout << "\t <Statement> ::= <Get>" << "\n";
@@ -524,9 +520,6 @@ void r_statement() {
         r_get();
     }
     else if (lexeme == "while") {
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 13\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
         if (printRule) {
             // print production rule
             cout << "\t <Statement> ::= <While>" << "\n";
@@ -535,20 +528,20 @@ void r_statement() {
         r_while();
     }
     else if (lexeme == "end") {
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 8\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
         inFile >> token >> lexeme;
+        // print token and lexeme
+        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 7\n";
+        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
     }
     else if (lexeme == "endif") {
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 8\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
         inFile >> token >> lexeme;
+        // print token and lexeme
+        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 7\n";
+        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
     }
     else {
-        cout << "Rule 7 error: No valid statement found for " << token << " " << lexeme << "\n";
-        outFile << "Rule 7 error: No valid statement found for " << token << " " << lexeme << "\n";
+        cout << "Rule 7 error: No valid statement begins for " << token << " " << lexeme << "\n";
+        outFile << "Rule 7 error: No valid statement begins for " << token << " " << lexeme << "\n";
         exit(EXIT_FAILURE);
     }
     return;
@@ -563,6 +556,9 @@ void r_compound() {
             outFile << "\t <Compound> ::= begin <Statement List> end" << "\n";
         }
         inFile >> token >> lexeme;
+        // print token and lexeme
+        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 8\n";
+        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
 
         r_statementList();  // <Statement List>
 
@@ -571,6 +567,7 @@ void r_compound() {
         // error
         cout << "Rule 8 Error: expected begin\n";
         outFile << "Rule 8 Error: expected begin\n";
+        exit(EXIT_FAILURE);
     }
     return;
 }
@@ -584,37 +581,43 @@ void r_assign() {
             outFile << "\t <Assign> ::= <Identifier> = <Expression> ;" << "\n";
         }
         inFile >> token >> lexeme;
+        // print token and lexeme
+        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 9\n";
+        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
 
         if (lexeme == "=") {
+            inFile >> token >> lexeme;
             // print token and lexeme
             cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 9\n";
             outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-            inFile >> token >> lexeme;
 
             r_expression(); // <Expression>
 
             if (lexeme == ";") {
+                inFile >> token >> lexeme;
                 //print token and lexeme
                 cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 9\n";
                 outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-                inFile >> token >> lexeme;
             }
             else {
                 // error
                 cout << "Rule 9 Error: expected ;\n";
                 outFile << "Rule 9 Error: expected ;\n";
+                exit(EXIT_FAILURE);
             }
         }
         else {
             // error
             cout << "Rule 9 Error: expected =\n";
             outFile << "Rule 9 Error: expected =\n";
+            exit(EXIT_FAILURE);
         }
     }
     else {
         //error
         cout << "Rule 9 Error: expected id\n";
         outFile << "Rule 9 Error: expected id\n";
+        exit(EXIT_FAILURE);
     }
     return;
 }
@@ -628,20 +631,23 @@ void r_if() {
             outFile << "\t <If> ::= if ( <Condition> ) <Statement> <If P>" << "\n";
         }
         inFile >> token >> lexeme;
+        // print token and lexeme
+        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 10\n";
+        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
 
         if (lexeme == "(") {
-            // print token and lexeme for '('
+            inFile >> token >> lexeme;
+            // print token and lexeme
             cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 10\n";
             outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-            inFile >> token >> lexeme;
 
             r_condition();  // <Condition>
 
             if (lexeme == ")") {
-                // print token and lexeme for ')'
+                inFile >> token >> lexeme;
+                // print token and lexeme
                 cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 10\n";
                 outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-                inFile >> token >> lexeme;
 
                 r_statement();  // <Statement>
                 r_ifP();    // <If P>
@@ -650,18 +656,21 @@ void r_if() {
                 // error on ')'
                 cout << "Rule 10 Error: expected )\n";
                 outFile << "Rule 10 Error: expected )\n";
+                exit(EXIT_FAILURE);
             }
         }
         else {
             // error on '('
             cout << "Rule 10 Error: expected (\n";
             outFile << "Rule 10 Error: expected (\n";
+            exit(EXIT_FAILURE);
         }
     }
     else {
         // error on "if"
         cout << "Rule 10 Error: expected if\n";
         outFile << "Rule 10 Error: expected if\n";
+        exit(EXIT_FAILURE);
     }
     return;
 }
@@ -669,9 +678,6 @@ void r_if() {
 // Rule 23: <If P> ::= endif  |  else <Statement> endif
 void r_ifP() {
     if (lexeme == "endif" || lexeme == "else") {
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 23\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
         if (printRule && lexeme == "endif") {
             // print production rule
             cout << "\t <If P> ::= endif" << "\n";
@@ -684,6 +690,9 @@ void r_ifP() {
             outFile << "\t <If P> ::= else <Statement> endif" << "\n";
         }
         inFile >> token >> lexeme;
+        // print token and lexeme
+        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 23\n";
+        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
 
         if (lexeme == "else") {
             r_statement();  // <Statement>
@@ -693,6 +702,7 @@ void r_ifP() {
         // error
         cout << "Rule 23 Error: expected endif or else\n";
         outFile << "Rule 23 Error: expected endif or else\n";
+        exit(EXIT_FAILURE);
     }
     return;
 }
@@ -705,60 +715,67 @@ void r_put() {
             cout << "\t <Put> ::= put ( <identifier> );" << "\n";
             outFile << "\t <Put> ::= put ( <identifier> );" << "\n";
         }
-        inFile >> token >> lexeme;
+        inFile >> token >> lexeme;        // print token and lexeme
+        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 11\n";
+        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
 
         if (lexeme == "(") {
+            inFile >> token >> lexeme;
             // print token and lexeme
             cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 11\n";
             outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-            inFile >> token >> lexeme;
 
             if (token == "Identifier") {
+                inFile >> token >> lexeme;
                 // print token and lexeme
                 cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 11\n";
                 outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-                inFile >> token >> lexeme;
 
                 if (lexeme == ")") {
+                    inFile >> token >> lexeme;
                     // print token and lexeme
                     cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 11\n";
                     outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-                    inFile >> token >> lexeme;
 
                     if (lexeme == ";") {
-                        // print token and lexeme
-                        cout << "Token: " << token << "          Lexeme: " << lexeme << "rule 11\n";
-                        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
                         inFile >> token >> lexeme;
+                        // print token and lexeme
+                        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 11\n";
+                        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
                     }
                     else {
                         // error for ';'
                         cout << "Rule 11 Error: expected ;\n";
                         outFile << "Rule 11 Error: expected ;\n";
+                        exit(EXIT_FAILURE);
                     }
                 }
                 else {
                     // error for ')'
                     cout << "Rule 11 Error: expected )\n";
                     outFile << "Rule 11 Error: expected )\n";
+                    exit(EXIT_FAILURE);
                 }
             }
             else {
                 // error for identifier
                 cout << "Rule 11 Error: expected id\n";
                 outFile << "Rule 11 Error: expected id\n";
+                exit(EXIT_FAILURE);
             }
         }
         else {
             // error for '('
             cout << "Rule 11 Error: expected (\n";
             outFile << "Rule 11 Error: expected (\n";
+            exit(EXIT_FAILURE);
         }
     }
     else {
         // error for "put"
         cout << "Rule 11 Error: expected put\n";
         outFile << "Rule 11 Error: expected put\n";
+        exit(EXIT_FAILURE);
     }
     return;
 }
@@ -772,59 +789,67 @@ void r_get() {
             outFile << "\t <Get> ::= get ( <Identifier> );" << "\n";
         }
         inFile >> token >> lexeme;
+        // print token and lexeme
+        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 12\n";
+        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
 
         if (lexeme == "(") {
+            inFile >> token >> lexeme;
             // print token and lexeme
             cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 12\n";
             outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-            inFile >> token >> lexeme;
 
             if (token == "Identifier") {
+                inFile >> token >> lexeme;
                 // print token and lexeme
                 cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 12\n";
                 outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-                inFile >> token >> lexeme;
 
                 if (lexeme == ")") {
+                    inFile >> token >> lexeme;
                     // print token and lexeme
                     cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 12\n";
                     outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-                    inFile >> token >> lexeme;
 
                     if (lexeme == ";") {
+                        inFile >> token >> lexeme;
                         // print token and lexeme
                         cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 12\n";
                         outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-                        inFile >> token >> lexeme;
                     }
                     else {
                         // error for ';'
                         cout << "Rule 12 Error: expected ;\n";
                         outFile << "Rule 12 Error: expected ;\n";
+                        exit(EXIT_FAILURE);
                     }
                 }
                 else {
                     // error for ')'
                     cout << "Rule 12 Error: expected )\n";
                     outFile << "Rule 12 Error: expected )\n";
+                    exit(EXIT_FAILURE);
                 }
             }
             else {
                 // error for identifier
                 cout << "Rule 12 Error: expected id\n";
                 outFile << "Rule 12 Error: expected id\n";
+                exit(EXIT_FAILURE);
             }
         }
         else {
             // error for '('
             cout << "Rule 12 Error: expected (\n";
             outFile << "Rule 12 Error: expected (\n";
+            exit(EXIT_FAILURE);
         }
     }
     else {
         // error for "get"
         cout << "Rule 12 Error: expected get\n";
         outFile << "Rule 12 Error: expected get\n";
+        exit(EXIT_FAILURE);
     }
     return;
 }
@@ -838,20 +863,23 @@ void r_while() {
             outFile << "\t <While> ::= while ( <Condition> ) <Statement>" << "\n";
         }
         inFile >> token >> lexeme;
+        // print token and lexeme
+        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 13\n";
+        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
 
         if (lexeme == "(") {
+            inFile >> token >> lexeme;
             // print token and lexeme
             cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 13\n";
             outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-            inFile >> token >> lexeme;
 
             r_condition();  // <Condition>
 
             if (lexeme == ")") {
+                inFile >> token >> lexeme;
                 // print token and lexeme
                 cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 13\n";
                 outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-                inFile >> token >> lexeme;
 
                 r_statement(); // <Statement>
             }
@@ -859,18 +887,21 @@ void r_while() {
                 // error for ')'
                 cout << "Rule 13 Error: expected )\n";
                 outFile << "Rule 13 Error: expected )\n";
+                exit(EXIT_FAILURE);
             }
         }
         else {
             // error for "("
             cout << "Rule 13 Error: expected (\n";
             outFile << "Rule 13 Error: expected (\n";
+            exit(EXIT_FAILURE);
         }
     }
     else {
         // error for "while"
         cout << "Rule 13 Error: expected while\n";
         outFile << "Rule 13 Error: expected while\n";
+        exit(EXIT_FAILURE);
     }
     return;
 }
@@ -891,9 +922,6 @@ void r_condition() {
 // Rule 15: <Relop> ::= ==  |  >  |  <  |  /=    
 void r_relop() {
     if (lexeme == "==" || lexeme == ">" || lexeme == "<" || lexeme == "/=") {
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 15\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
         if (printRule && lexeme == "==") {
             // print production rule
             cout << "\t <Relop> ::=  ==" << "\n";
@@ -915,20 +943,21 @@ void r_relop() {
             outFile << "\t <Relop> ::=  /=" << "\n";
         }
         inFile >> token >> lexeme;
+        // print token and lexeme
+        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 15\n";
+        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
     }
     else {
         // error
         cout << "Rule 15 Error: expected ==, >, <, or /=\n";
         outFile << "Rule 15 Error: expected ==, >, <, or /=\n";
+        exit(EXIT_FAILURE);
     }
     return;
 }
 
 // Rule 16: <Expression> ::= <Term> <Expression P>
 void r_expression() {
-    // print token and lexeme
-    cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 18\n";
-    outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
     if (printRule) {
         // print production rule
         cout << "\t <Expression> ::= <Term> <Expression P>" << "\n";
@@ -960,8 +989,11 @@ void r_expressionP() {
         r_expressionP();
     }
     else {
-        cout << "\t <Expression P> ::= <Empty>" << "\n";
-        outFile << "\t <Expression P> ::= <Empty>" << "\n";
+        if (printRule) {
+            // print production rule
+            cout << "\t <Expression P> ::= <Empty>" << "\n";
+            outFile << "\t <Expression P> ::= <Empty>" << "\n";
+        }
     }
 }
 
@@ -980,9 +1012,6 @@ void r_term() {
 // Rule 25: <Term P> ::= * <Factor> <Term P>   |   / <Factor> <Term P>   |   <Empty>
 void r_termP() {
     if (lexeme == "*" || lexeme == "/") {
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 25\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
         if (printRule && lexeme == "*") {
             // print production rule
             cout << "\t <Term P> ::= * <Factor> <Term P>" << "\n";
@@ -994,13 +1023,19 @@ void r_termP() {
             outFile << "\t <Term P> ::= / <Factor> <Term P>" << "\n";
         }
         inFile >> token >> lexeme;
+        // print token and lexeme
+        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 25\n";
+        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
 
         r_factor();
         r_termP();
     }
     else {
-        cout << "\t <Term P> ::= <Empty>" << "\n";
-        outFile << "\t <Term P> ::= <Empty>" << "\n";
+        if (printRule) {
+            // print production rule
+            cout << "\t <Term P> ::= <Empty>" << "\n";
+            outFile << "\t <Term P> ::= <Empty>" << "\n";
+        }
     }
 }
 
@@ -1014,7 +1049,7 @@ void r_factor() {
         }
         inFile >> token >> lexeme;
         // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 19\n";
+        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 18\n";
         outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
 
         r_primary();
@@ -1030,6 +1065,8 @@ void r_factor() {
     else {
         // error
         cout << "Rule 18 Error: expected -, id, int, keyword, or sep\n";
+        outFile << "Rule 18 Error: expected -, id, int, keyword, or sep\n";
+        exit(EXIT_FAILURE);
     }
 
     return;
@@ -1102,6 +1139,7 @@ void r_primary() {
         //error
         cout << "Rule 19 Error: expected id, int, bool, (, )\n";
         outFile << "Rule 19 Error: expected id, int, bool, (, )\n";
+        exit(EXIT_FAILURE);
     }
     return;
 }
