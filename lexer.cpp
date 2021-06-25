@@ -507,6 +507,12 @@ void r_statement() {
         outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
         inFile >> token >> lexeme;
     }
+    else if (lexeme == "endif") {
+        // print token and lexeme
+        cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 8\n";
+        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        inFile >> token >> lexeme;
+    }
     else {
         cout << "Rule 7 error: No valid statement found for " << token << " " << lexeme << "\n";
         outFile << "Rule 7 error: No valid statement found for " << token << " " << lexeme << "\n";
@@ -530,16 +536,6 @@ void r_compound() {
 
         r_statementList();  // <Statement List>
 
-        /*if (lexeme == "end") {
-            cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 8\n";
-            outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-            inFile >> token >> lexeme;
-        }
-        else {
-            // error for end
-            cout << "Rule 8 Error: expected end\n";
-            outFile << "Rule 8 Error: expected end\n";
-        }*/
     }
     else {
         // error
@@ -667,18 +663,6 @@ void r_ifP() {
 
         if (lexeme == "else") {
             r_statement();  // <Statement>
-
-            if (lexeme == "endif") {
-                // print token and lexeme
-                cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 23\n";
-                outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-                inFile >> token >> lexeme;
-            }
-            else {
-                // error
-                cout << "Rule 23 Error: expected endif\n";
-                outFile << "Rule 23 Error: expected endif\n";
-            }
         }
     }
     else {
