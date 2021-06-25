@@ -323,6 +323,7 @@ void r_rat21Su() {
     else {
         //error: Expected %%
         cout << "Rule 1 Error: expected %%\n";
+        outFile << "Rule 1 Error: expected %%\n";
     }
     return;
 }
@@ -357,6 +358,7 @@ void r_declarationList() {
     else {
         //error: Expected ';'
         cout << "Rule 3 Error: expected ;\n";
+        outFile << "Rule 3 Error: expected ;\n";
     }
     r_declarationListP();
 }
@@ -391,6 +393,7 @@ void r_declaration() {
     else {
         // error: Expected id
         cout << "Rule 4 Error: expected id\n";
+        outFile << "Rule 4 Error: expected id\n";
     }
     return;
 }
@@ -416,6 +419,7 @@ void r_qualifier() {
     else {
         // error
         cout << "Rule 5 Error: expected integer or boolean\n";
+        outFile << "Rule 5 Error: expected integer or boolean\n";
     }
     return;
 }
@@ -505,6 +509,7 @@ void r_statement() {
     }*/
     else {
         cout << "Rule 7 error: No valid statement found for " << token << " " << lexeme << "\n";
+        outFile << "Rule 7 error: No valid statement found for " << token << " " << lexeme << "\n";
         exit(EXIT_FAILURE);
     }
     return;
@@ -519,6 +524,7 @@ void r_compound() {
         if (printRule) {
             // print production rule
             cout << "\t <Compound> ::= begin <Statement List> end" << "\n";
+            outFile << "\t <Compound> ::= begin <Statement List> end" << "\n";
         }
         inFile >> token >> lexeme;
 
@@ -532,11 +538,13 @@ void r_compound() {
         else {
             // error for end
             cout << "Rule 8 Error: expected end\n";
+            outFile << "Rule 8 Error: expected end\n";
         }
     }
     else {
         // error
         cout << "Rule 8 Error: expected begin\n";
+        outFile << "Rule 8 Error: expected begin\n";
     }
     return;
 }
@@ -571,16 +579,19 @@ void r_assign() {
             else {
                 // error
                 cout << "Rule 9 Error: expected ;\n";
+                outFile << "Rule 9 Error: expected ;\n";
             }
         }
         else {
             // error
             cout << "Rule 9 Error: expected =\n";
+            outFile << "Rule 9 Error: expected =\n";
         }
     }
     else {
         //error
         cout << "Rule 9 Error: expected id\n";
+        outFile << "Rule 9 Error: expected id\n";
     }
     return;
 }
@@ -618,16 +629,19 @@ void r_if() {
             else {
                 // error on ')'
                 cout << "Rule 10 Error: expected )\n";
+                outFile << "Rule 10 Error: expected )\n";
             }
         }
         else {
             // error on '('
             cout << "Rule 10 Error: expected (\n";
+            outFile << "Rule 10 Error: expected (\n";
         }
     }
     else {
         // error on "if"
         cout << "Rule 10 Error: expected if\n";
+        outFile << "Rule 10 Error: expected if\n";
     }
     return;
 }
@@ -663,13 +677,14 @@ void r_ifP() {
             else {
                 // error
                 cout << "Rule 23 Error: expected endif\n";
+                outFile << "Rule 23 Error: expected endif\n";
             }
         }
     }
     else {
         // error
         cout << "Rule 23 Error: expected endif or else\n";
-
+        outFile << "Rule 23 Error: expected endif or else\n";
     }
     return;
 }
@@ -714,26 +729,31 @@ void r_put() {
                     else {
                         // error for ';'
                         cout << "Rule 11 Error: expected ;\n";
+                        outFile << "Rule 11 Error: expected ;\n";
                     }
                 }
                 else {
                     // error for ')'
                     cout << "Rule 11 Error: expected )\n";
+                    outFile << "Rule 11 Error: expected )\n";
                 }
             }
             else {
                 // error for identifier
                 cout << "Rule 11 Error: expected id\n";
+                outFile << "Rule 11 Error: expected id\n";
             }
         }
         else {
             // error for '('
             cout << "Rule 11 Error: expected (\n";
+            outFile << "Rule 11 Error: expected (\n";
         }
     }
     else {
         // error for "put"
         cout << "Rule 11 Error: expected put\n";
+        outFile << "Rule 11 Error: expected put\n";
     }
     return;
 }
@@ -778,26 +798,31 @@ void r_get() {
                     else {
                         // error for ';'
                         cout << "Rule 12 Error: expected ;\n";
+                        outFile << "Rule 12 Error: expected ;\n";
                     }
                 }
                 else {
                     // error for ')'
                     cout << "Rule 12 Error: expected )\n";
+                    outFile << "Rule 12 Error: expected )\n";
                 }
             }
             else {
                 // error for identifier
                 cout << "Rule 12 Error: expected id\n";
+                outFile << "Rule 12 Error: expected id\n";
             }
         }
         else {
             // error for '('
             cout << "Rule 12 Error: expected (\n";
+            outFile << "Rule 12 Error: expected (\n";
         }
     }
     else {
         // error for "get"
         cout << "Rule 12 Error: expected get\n";
+        outFile << "Rule 12 Error: expected get\n";
     }
     return;
 }
@@ -834,16 +859,19 @@ void r_while() {
             else {
                 // error for ')'
                 cout << "Rule 13 Error: expected )\n";
+                outFile << "Rule 13 Error: expected )\n";
             }
         }
         else {
             // error for "("
             cout << "Rule 13 Error: expected (\n";
+            outFile << "Rule 13 Error: expected (\n";
         }
     }
     else {
         // error for "while"
         cout << "Rule 13 Error: expected while\n";
+        outFile << "Rule 13 Error: expected while\n";
     }
     return;
 }
@@ -892,6 +920,7 @@ void r_relop() {
     else {
         // error
         cout << "Rule 15 Error: expected ==, >, <, or /=\n";
+        outFile << "Rule 15 Error: expected ==, >, <, or /=\n";
     }
     return;
 }
@@ -1056,6 +1085,7 @@ void r_primary() {
     else {
         //error
         cout << "Rule 19 Error: expected id, int, bool, (, )\n";
+        outFile << "Rule 19 Error: expected id, int, bool, (, )\n";
     }
     return;
 }
