@@ -1,0 +1,33 @@
+/* output 10 terms in fibonacci series */
+
+%%
+/* declaration */
+integer n; 
+integer t1; 
+integer t2; 
+integer nextT;
+integer i;
+
+n = 10 + 1; /* number of terms + 1 */
+t1 = 0;
+t2 = 1;
+nextT = 0;
+
+i = 0;
+while (i < n)
+begin
+	if (i == 1)
+		put(t1);
+	endif
+	if (i == 2)
+		put(t2);
+	endif
+	
+	nextT = t1 + t2;
+	t1 = t2;
+	t2 = nextT;
+	
+	put(nextT);
+	i = i + 1;
+end
+%%
