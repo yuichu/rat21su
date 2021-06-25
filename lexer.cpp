@@ -501,12 +501,12 @@ void r_statement() {
         }
         r_while();
     }
-    /*else if (lexeme == "end") {
+    else if (lexeme == "end") {
         // print token and lexeme
         cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 8\n";
         outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
         inFile >> token >> lexeme;
-    }*/
+    }
     else {
         cout << "Rule 7 error: No valid statement found for " << token << " " << lexeme << "\n";
         outFile << "Rule 7 error: No valid statement found for " << token << " " << lexeme << "\n";
@@ -530,7 +530,7 @@ void r_compound() {
 
         r_statementList();  // <Statement List>
 
-        if (lexeme == "end") {
+        /*if (lexeme == "end") {
             cout << "Token: " << token << "          Lexeme: " << lexeme << " rule 8\n";
             outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
             inFile >> token >> lexeme;
@@ -539,7 +539,7 @@ void r_compound() {
             // error for end
             cout << "Rule 8 Error: expected end\n";
             outFile << "Rule 8 Error: expected end\n";
-        }
+        }*/
     }
     else {
         // error
