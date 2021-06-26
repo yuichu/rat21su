@@ -1,0 +1,176 @@
+Token: Separator          Lexeme: %%
+	 <Rat21SU> ::= %% <Opt Declaration List> <Statement List> %%
+Token: Keyword          Lexeme: integer
+	 <Opt Declaration List> ::= <Declaration List>  |  <Empty>
+	 <Declaration List> ::= <Declaration> ; <Declaration List P>
+	 <Declaration> ::= <Qualifier> <identifier> 
+	 <Qualifier> ::= integer
+Token: Identifier          Lexeme: num1
+Token: Separator          Lexeme: ;
+Token: Keyword          Lexeme: integer
+	 <Declaration List P> ::= <Declaration List>  |  <Empty>
+	 <Declaration List> ::= <Declaration> ; <Declaration List P>
+	 <Declaration> ::= <Qualifier> <identifier> 
+	 <Qualifier> ::= integer
+Token: Identifier          Lexeme: num2
+Token: Separator          Lexeme: ;
+Token: Keyword          Lexeme: integer
+	 <Declaration List P> ::= <Declaration List>  |  <Empty>
+	 <Declaration List> ::= <Declaration> ; <Declaration List P>
+	 <Declaration> ::= <Qualifier> <identifier> 
+	 <Qualifier> ::= integer
+Token: Identifier          Lexeme: gcd
+Token: Separator          Lexeme: ;
+Token: Identifier          Lexeme: num1
+	 <Declaration List P> ::= <Declaration List>  |  <Empty>
+	 <Declaration List P> ::= <Empty>
+	 <Statement List> ::= <Statement> <Statement List P>
+	 <Statement> ::= <Assign>
+	 <Assign> ::= <Identifier> = <Expression> ;
+Token: Operator          Lexeme: =
+Token: Integer          Lexeme: 834
+	 <Expression> ::= <Term> <Expression P>
+	 <Term> ::= <Factor> <Term P>
+	 <Factor> ::= <Primary>
+	 <Primary> ::= <Integer>
+Token: Separator          Lexeme: ;
+	 <Term P> ::= <Empty>
+	 <Expression P> ::= <Empty>
+Token: Identifier          Lexeme: num2
+	 <Statement List P> ::= <Statement List>
+	 <Statement List> ::= <Statement> <Statement List P>
+	 <Statement> ::= <Assign>
+	 <Assign> ::= <Identifier> = <Expression> ;
+Token: Operator          Lexeme: =
+Token: Integer          Lexeme: 4
+	 <Expression> ::= <Term> <Expression P>
+	 <Term> ::= <Factor> <Term P>
+	 <Factor> ::= <Primary>
+	 <Primary> ::= <Integer>
+Token: Separator          Lexeme: ;
+	 <Term P> ::= <Empty>
+	 <Expression P> ::= <Empty>
+Token: Keyword          Lexeme: while
+	 <Statement List P> ::= <Statement List>
+	 <Statement List> ::= <Statement> <Statement List P>
+	 <Statement> ::= <While>
+	 <While> ::= while ( <Condition> ) <Statement>
+Token: Separator          Lexeme: (
+Token: Identifier          Lexeme: num1
+	 <Condition> ::= <Expression> <Relop> <Expression>
+	 <Expression> ::= <Term> <Expression P>
+	 <Term> ::= <Factor> <Term P>
+	 <Factor> ::= <Primary>
+	 <Primary> ::= <Identifier>
+Token: Operator          Lexeme: /=
+	 <Term P> ::= <Empty>
+	 <Expression P> ::= <Empty>
+	 <Relop> ::=  /=
+Token: Identifier          Lexeme: num2
+	 <Expression> ::= <Term> <Expression P>
+	 <Term> ::= <Factor> <Term P>
+	 <Factor> ::= <Primary>
+	 <Primary> ::= <Identifier>
+Token: Separator          Lexeme: )
+	 <Term P> ::= <Empty>
+	 <Expression P> ::= <Empty>
+Token: Keyword          Lexeme: begin
+	 <Statement> ::= <Compound>
+	 <Compound> ::= begin <Statement List> end
+Token: Keyword          Lexeme: if
+	 <Statement List> ::= <Statement> <Statement List P>
+	 <Statement> ::= <If>
+	 <If> ::= if ( <Condition> ) <Statement> <If P>
+Token: Separator          Lexeme: (
+Token: Identifier          Lexeme: num1
+	 <Condition> ::= <Expression> <Relop> <Expression>
+	 <Expression> ::= <Term> <Expression P>
+	 <Term> ::= <Factor> <Term P>
+	 <Factor> ::= <Primary>
+	 <Primary> ::= <Identifier>
+Token: Operator          Lexeme: >
+	 <Term P> ::= <Empty>
+	 <Expression P> ::= <Empty>
+	 <Relop> ::=  >
+Token: Identifier          Lexeme: num2
+	 <Expression> ::= <Term> <Expression P>
+	 <Term> ::= <Factor> <Term P>
+	 <Factor> ::= <Primary>
+	 <Primary> ::= <Identifier>
+Token: Separator          Lexeme: )
+	 <Term P> ::= <Empty>
+	 <Expression P> ::= <Empty>
+Token: Identifier          Lexeme: num1
+	 <Statement> ::= <Assign>
+	 <Assign> ::= <Identifier> = <Expression> ;
+Token: Operator          Lexeme: =
+Token: Identifier          Lexeme: num1
+	 <Expression> ::= <Term> <Expression P>
+	 <Term> ::= <Factor> <Term P>
+	 <Factor> ::= <Primary>
+	 <Primary> ::= <Identifier>
+Token: Operator          Lexeme: -
+	 <Term P> ::= <Empty>
+	 <Expression P> ::= - <Term> <Expression P>
+Token: Identifier          Lexeme: num2
+	 <Term> ::= <Factor> <Term P>
+	 <Factor> ::= <Primary>
+	 <Primary> ::= <Identifier>
+Token: Separator          Lexeme: ;
+	 <Term P> ::= <Empty>
+	 <Expression P> ::= <Empty>
+Token: Keyword          Lexeme: else
+	 <If P> ::= else <Statement> endif
+Token: Identifier          Lexeme: num2
+	 <Statement List P> ::= <Statement List>
+	 <Statement List> ::= <Statement> <Statement List P>
+	 <Statement> ::= <Assign>
+	 <Assign> ::= <Identifier> = <Expression> ;
+Token: Operator          Lexeme: =
+Token: Identifier          Lexeme: num2
+	 <Expression> ::= <Term> <Expression P>
+	 <Term> ::= <Factor> <Term P>
+	 <Factor> ::= <Primary>
+	 <Primary> ::= <Identifier>
+Token: Operator          Lexeme: -
+	 <Term P> ::= <Empty>
+	 <Expression P> ::= - <Term> <Expression P>
+Token: Identifier          Lexeme: num1
+	 <Term> ::= <Factor> <Term P>
+	 <Factor> ::= <Primary>
+	 <Primary> ::= <Identifier>
+Token: Separator          Lexeme: ;
+	 <Term P> ::= <Empty>
+	 <Expression P> ::= <Empty>
+Token: Keyword          Lexeme: endif
+	 <Statement List P> ::= <Statement List>
+	 <Statement List> ::= <Statement> <Statement List P>
+Token: Keyword          Lexeme: end
+	 <Statement List P> ::= <Statement List>
+	 <Statement List> ::= <Statement> <Statement List P>
+Token: Identifier          Lexeme: gcd
+	 <Statement List P> ::= <Statement List>
+	 <Statement List> ::= <Statement> <Statement List P>
+	 <Statement> ::= <Assign>
+	 <Assign> ::= <Identifier> = <Expression> ;
+Token: Operator          Lexeme: =
+Token: Identifier          Lexeme: num1
+	 <Expression> ::= <Term> <Expression P>
+	 <Term> ::= <Factor> <Term P>
+	 <Factor> ::= <Primary>
+	 <Primary> ::= <Identifier>
+Token: Separator          Lexeme: ;
+	 <Term P> ::= <Empty>
+	 <Expression P> ::= <Empty>
+Token: Keyword          Lexeme: put
+	 <Statement List P> ::= <Statement List>
+	 <Statement List> ::= <Statement> <Statement List P>
+	 <Statement> ::= <Put>
+	 <Put> ::= put ( <identifier> );
+Token: Separator          Lexeme: (
+Token: Identifier          Lexeme: gcd
+Token: Separator          Lexeme: )
+Token: Separator          Lexeme: ;
+Token: Separator          Lexeme: %%
+	 <Statement List P> ::= <Empty>
+	 <Statement List P> ::= <Empty>
