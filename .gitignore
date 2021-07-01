@@ -35,5 +35,4 @@
 .vscode/
 
 # Individual files
-testprof.txt
-outputprof.txt
+Tokens.txt
