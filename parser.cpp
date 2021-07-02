@@ -50,7 +50,7 @@ void r_termP();
 void r_factor();
 void r_primary();
 bool s_lookup();
-int s_getAddress();
+//int s_getAddress();
 void s_insert();
 void s_print();
 void gen_instruction();
@@ -108,10 +108,12 @@ int main(int argc, char* argv[])
     inFile.open("Tokens.txt");
     outFile.open(argv[2]);
 
-    // skips over the first "Token" and "Lexeme" labels
-    inFile >> token >> lexeme >> token >> lexeme;
-
     cout << endl;
+
+    // skip over the "Token" and "Lexeme" labels,
+    inFile >> token >> lexeme;
+    // then get and print the first token from the list
+    lexer();
 
     r_rat21Su();
 
@@ -278,10 +280,10 @@ bool isKeyword() {
 
 // Get the next token from the file
 void lexer() {
-        inFile >> token >> lexeme;
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+    inFile >> token >> lexeme;
+    // print token and lexeme
+    cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+    outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
 }
 
 
@@ -294,8 +296,6 @@ void lexer() {
 // Rule 1: <Rat21SU> ::= %% <Opt Declaration List> <Statement List> %%
 void r_rat21Su() {
     if (lexeme == "%%") {
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
         if (printRule) {
             // print production rule
             cout << "\t <Rat21SU> ::= %% <Opt Declaration List> <Statement List> %%" << "\n";
@@ -554,7 +554,7 @@ void r_assign() {
             cout << "\t <Assign> ::= <Identifier> = <Expression> ;" << "\n";
             outFile << "\t <Assign> ::= <Identifier> = <Expression> ;" << "\n";
         }
-        
+
         lexer();
 
         if (lexeme == "=") {
@@ -995,9 +995,6 @@ void r_primary() {
         lexer();
     }
     else if (lexeme == "true" || lexeme == "false") {
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
         if (printRule && lexeme == "true") {
             // print production rule
             cout << "\t <Primary> ::= true" << "\n";
@@ -1011,9 +1008,6 @@ void r_primary() {
         lexer();
     }
     else if (lexeme == "(") {
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
         if (printRule) {
             // print production rule
             cout << "\t <Primary> ::= ( <Expression> ) " << "\n";
@@ -1024,9 +1018,6 @@ void r_primary() {
         r_expression(); // <Expression>
 
         if (lexeme == ")") {
-            // print token and lexeme
-            cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-            outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
             lexer();
         }
     }
@@ -1056,11 +1047,11 @@ bool s_lookup() {
     return 0;   // return true if identifier already exists
 }
 
-int s_getAddress(/*token*/) {
-    int address;
-    // return address of identifier from SYMBOL_TABLE
-    return address;
-}
+//int s_getAddress(/*token*/) {
+//    int address;
+//    // return address of identifier from SYMBOL_TABLE
+//    return address;
+//}
 
 void s_insert() {
     // insert identifier, address, and type into SYMBOL_TABLE
@@ -1077,20 +1068,20 @@ void s_print() {
 //--------------------------------------------------------------------------
 
 void gen_instruction() {
-/*  
-    // for arguments (op, oprnd)
-    INSTR_TABLE [instr_address].address = inst_address;
-    INSTR_TABLE [instr_address].op = op;
-    INSTR_TABLE [instr_address].oprnd = oprnd;
-    instr_address++;
-*/
-// note, instr_address should begin at 1 NOT 0!!
+    /*
+        // for arguments (op, oprnd)
+        INSTR_TABLE [instr_address].address = inst_address;
+        INSTR_TABLE [instr_address].op = op;
+        INSTR_TABLE [instr_address].oprnd = oprnd;
+        instr_address++;
+    */
+    // note, instr_address should begin at 1 NOT 0!!
     return;
 }
 
 void back_patch(/*jump_addr aka instr_address*/) {
-/*
-    addr = pop_jumpstack();
-    Instr_table[addr].oprn = jump_addr;
-*/
+    /*
+        addr = pop_jumpstack();
+        Instr_table[addr].oprn = jump_addr;
+    */
 }
