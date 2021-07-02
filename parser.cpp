@@ -7,6 +7,8 @@ using namespace std;
 char separators[] = { '(', ')', '[', ']', '{', '}', ',', ':', ';' };
 char operators[] = { '*', '+', '-', '=', '/', '>', '<', '%', '|' };
 string keywords[13] = { "integer", "float", "boolean", "true", "false", "if", "else", "while", "put", "get", "begin", "end", "endif" };
+string INSTR_TABLE[400][3];  // assembly instruction
+string SYMBOL_TABLE[100][3]; // symbol table
 
 vector<char> buffer;
 ifstream inFile;
@@ -14,11 +16,14 @@ ofstream outFile;
 string token;
 string lexeme;
 bool printRule = true;
+int memory_address = 10000; // increment by one when a new identifier is declared and placed into the symbol table
+int instr_address = 1;
 
 int tokenizer(char currChar, int currState);
 // print(int state) -> prints token and lexeme
 void print(int state);
 bool isKeyword();
+void lexer();
 
 void r_rat21Su();
 void r_optDeclarationList();
@@ -44,35 +49,13 @@ void r_term();
 void r_termP();
 void r_factor();
 void r_primary();
+bool s_lookup();
+int s_getAddress();
+void s_insert();
+void s_print();
+void gen_instruction();
+void back_patch();
 
-// Record Class ** WORK IN PROGRESS **
-class record
-{
-private:
-    // Contains token value and lexeme
-    string token, lexeme;
-
-public:
-    string getToken()
-    {
-        return this->token;
-    }
-
-    string getLexeme()
-    {
-        return this->lexeme;
-    }
-
-    void setToken(string s)
-    {
-        this->token = s;
-    }
-
-    void setLexeme(string s)
-    {
-        this->lexeme = s;
-    }
-};
 
 // FSM for identifier and integer tokens
 int DFSM[6][3] = {
@@ -293,8 +276,13 @@ bool isKeyword() {
     return false;
 }
 
-
-
+// Get the next token from the file
+void lexer() {
+        inFile >> token >> lexeme;
+        // print token and lexeme
+        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+}
 
 
 //--------------------------------------------------------------------------
@@ -313,9 +301,7 @@ void r_rat21Su() {
             cout << "\t <Rat21SU> ::= %% <Opt Declaration List> <Statement List> %%" << "\n";
             outFile << "\t <Rat21SU> ::= %% <Opt Declaration List> <Statement List> %%" << "\n";
         }
-        inFile >> token >> lexeme;
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        lexer();
 
         r_optDeclarationList();
         r_statementList();
@@ -347,6 +333,7 @@ void r_optDeclarationList() {
     if (lexeme != "%%" && !inFile.eof() && (lexeme == "integer" || lexeme == "boolean")) {
 
         r_declarationList();
+        // TO DO: Print out the Symbol Table
     }
     else {
         cout << "\t <Opt Declaration List> ::= <Empty>" << "\n";
@@ -356,6 +343,7 @@ void r_optDeclarationList() {
 
 // Rule 3: <Declaration List> ::= <Declaration> ; <Declaration List P>
 void r_declarationList() {
+
     if (printRule) {
         // print production rule
         cout << "\t <Declaration List> ::= <Declaration> ; <Declaration List P>" << "\n";
@@ -363,10 +351,8 @@ void r_declarationList() {
     }
     r_declaration();
     if (lexeme == ";") {
-        inFile >> token >> lexeme;
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        lexer();
+        // TO DO: LOOKUP & INSERT TO SYMBOL TABLE 
         r_declarationListP();
     }
     else {
@@ -406,13 +392,7 @@ void r_declaration() {
     r_qualifier(); // <Qualifier>
 
     if (token == "Identifier") {    // <identifier>
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-
-        inFile >> token >> lexeme;
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        lexer();
     }
     else {
         // error: Expected id
@@ -436,7 +416,7 @@ void r_qualifier() {
             cout << "\t <Qualifier> ::= boolean" << "\n";
             outFile << "\t <Qualifier> ::= boolean" << "\n";
         }
-        inFile >> token >> lexeme;
+        lexer();
     }
     else {
         // error
@@ -531,16 +511,10 @@ void r_statement() {
         r_while();
     }
     else if (lexeme == "end") {
-        inFile >> token >> lexeme;
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        lexer();
     }
     else if (lexeme == "endif") {
-        inFile >> token >> lexeme;
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        lexer();
     }
     else {
         cout << "Rule 7 error: No valid statement begins for " << token << " " << lexeme << "\n";
@@ -558,10 +532,7 @@ void r_compound() {
             cout << "\t <Compound> ::= begin <Statement List> end" << "\n";
             outFile << "\t <Compound> ::= begin <Statement List> end" << "\n";
         }
-        inFile >> token >> lexeme;
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        lexer();
 
         r_statementList();  // <Statement List>
 
@@ -583,24 +554,18 @@ void r_assign() {
             cout << "\t <Assign> ::= <Identifier> = <Expression> ;" << "\n";
             outFile << "\t <Assign> ::= <Identifier> = <Expression> ;" << "\n";
         }
-        inFile >> token >> lexeme;
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        
+        lexer();
 
         if (lexeme == "=") {
-            inFile >> token >> lexeme;
-            // print token and lexeme
-            cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-            outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+            lexer();
 
             r_expression(); // <Expression>
 
+            // TO DO: get_instr (POPM, get_address (save) );
+
             if (lexeme == ";") {
-                inFile >> token >> lexeme;
-                //print token and lexeme
-                cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-                outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+                lexer();
             }
             else {
                 // error
@@ -633,24 +598,15 @@ void r_if() {
             cout << "\t <If> ::= if ( <Condition> ) <Statement> <If P>" << "\n";
             outFile << "\t <If> ::= if ( <Condition> ) <Statement> <If P>" << "\n";
         }
-        inFile >> token >> lexeme;
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        lexer();
 
         if (lexeme == "(") {
-            inFile >> token >> lexeme;
-            // print token and lexeme
-            cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-            outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+            lexer();
 
             r_condition();  // <Condition>
 
             if (lexeme == ")") {
-                inFile >> token >> lexeme;
-                // print token and lexeme
-                cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-                outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+                lexer();
 
                 r_statement();  // <Statement>
                 r_ifP();    // <If P>
@@ -692,10 +648,7 @@ void r_ifP() {
             cout << "\t <If P> ::= else <Statement> endif" << "\n";
             outFile << "\t <If P> ::= else <Statement> endif" << "\n";
         }
-        inFile >> token >> lexeme;
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        lexer();
 
         if (lexeme == "else") {
             r_statement();  // <Statement>
@@ -718,33 +671,19 @@ void r_put() {
             cout << "\t <Put> ::= put ( <identifier> );" << "\n";
             outFile << "\t <Put> ::= put ( <identifier> );" << "\n";
         }
-        inFile >> token >> lexeme;        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        lexer();
 
         if (lexeme == "(") {
-            inFile >> token >> lexeme;
-            // print token and lexeme
-            cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-            outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+            lexer();
 
             if (token == "Identifier") {
-                inFile >> token >> lexeme;
-                // print token and lexeme
-                cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-                outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+                lexer();
 
                 if (lexeme == ")") {
-                    inFile >> token >> lexeme;
-                    // print token and lexeme
-                    cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-                    outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+                    lexer();
 
                     if (lexeme == ";") {
-                        inFile >> token >> lexeme;
-                        // print token and lexeme
-                        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-                        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+                        lexer();
                     }
                     else {
                         // error for ';'
@@ -791,34 +730,19 @@ void r_get() {
             cout << "\t <Get> ::= get ( <Identifier> );" << "\n";
             outFile << "\t <Get> ::= get ( <Identifier> );" << "\n";
         }
-        inFile >> token >> lexeme;
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        lexer();
 
         if (lexeme == "(") {
-            inFile >> token >> lexeme;
-            // print token and lexeme
-            cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-            outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+            lexer();
 
             if (token == "Identifier") {
-                inFile >> token >> lexeme;
-                // print token and lexeme
-                cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-                outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+                lexer();
 
                 if (lexeme == ")") {
-                    inFile >> token >> lexeme;
-                    // print token and lexeme
-                    cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-                    outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+                    lexer();
 
                     if (lexeme == ";") {
-                        inFile >> token >> lexeme;
-                        // print token and lexeme
-                        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-                        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+                        lexer();
                     }
                     else {
                         // error for ';'
@@ -865,24 +789,15 @@ void r_while() {
             cout << "\t <While> ::= while ( <Condition> ) <Statement>" << "\n";
             outFile << "\t <While> ::= while ( <Condition> ) <Statement>" << "\n";
         }
-        inFile >> token >> lexeme;
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        lexer();
 
         if (lexeme == "(") {
-            inFile >> token >> lexeme;
-            // print token and lexeme
-            cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-            outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+            lexer();
 
             r_condition();  // <Condition>
 
             if (lexeme == ")") {
-                inFile >> token >> lexeme;
-                // print token and lexeme
-                cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-                outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+                lexer();
 
                 r_statement(); // <Statement>
             }
@@ -945,10 +860,7 @@ void r_relop() {
             cout << "\t <Relop> ::=  /=" << "\n";
             outFile << "\t <Relop> ::=  /=" << "\n";
         }
-        inFile >> token >> lexeme;
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        lexer();
     }
     else {
         // error
@@ -984,9 +896,7 @@ void r_expressionP() {
             cout << "\t <Expression P> ::= - <Term> <Expression P>" << "\n";
             outFile << "\t <Expression P> ::= - <Term> <Expression P>" << "\n";
         }
-        inFile >> token >> lexeme;
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        lexer();
 
         r_term();
         r_expressionP();
@@ -1025,10 +935,7 @@ void r_termP() {
             cout << "\t <Term P> ::= / <Factor> <Term P>" << "\n";
             outFile << "\t <Term P> ::= / <Factor> <Term P>" << "\n";
         }
-        inFile >> token >> lexeme;
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        lexer();
 
         r_factor();
         r_termP();
@@ -1050,10 +957,7 @@ void r_factor() {
             cout << "\t <Factor> ::=  - <Primary>" << "\n";
             outFile << "\t <Factor> ::=  - <Primary>" << "\n";
         }
-        inFile >> token >> lexeme;
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        lexer();
 
         r_primary();
     }
@@ -1088,10 +992,7 @@ void r_primary() {
             cout << "\t <Primary> ::= <Integer>" << "\n";
             outFile << "\t <Primary> ::= <Integer>" << "\n";
         }
-        inFile >> token >> lexeme;
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        lexer();
     }
     else if (lexeme == "true" || lexeme == "false") {
         // print token and lexeme
@@ -1107,10 +1008,7 @@ void r_primary() {
             cout << "\t <Primary> ::= false" << "\n";
             outFile << "\t <Primary> ::= false" << "\n";
         }
-        inFile >> token >> lexeme;
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        lexer();
     }
     else if (lexeme == "(") {
         // print token and lexeme
@@ -1121,10 +1019,7 @@ void r_primary() {
             cout << "\t <Primary> ::= ( <Expression> ) " << "\n";
             outFile << "\t <Primary> ::= ( <Expression> ) " << "\n";
         }
-        inFile >> token >> lexeme;
-        // print token and lexeme
-        cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-        outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+        lexer();
 
         r_expression(); // <Expression>
 
@@ -1132,10 +1027,7 @@ void r_primary() {
             // print token and lexeme
             cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
             outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-            inFile >> token >> lexeme;
-            // print token and lexeme
-            cout << "Token: " << token << "          Lexeme: " << lexeme << "\n";
-            outFile << "Token: " << token << "          Lexeme: " << lexeme << "\n";
+            lexer();
         }
     }
     else {
@@ -1151,4 +1043,54 @@ void r_primary() {
 void r_empty() {
     // check eof
     return;
+}
+
+
+//--------------------------------------------------------------------------
+// Following are procedures for symbol table.
+// Each function will begin with s_ to indicate that it's a symbol table procedure.
+//--------------------------------------------------------------------------
+
+bool s_lookup() {
+    // check if identifier already exists in SYMBOL_TABLE
+    return 0;   // return true if identifier already exists
+}
+
+int s_getAddress(/*token*/) {
+    int address;
+    // return address of identifier from SYMBOL_TABLE
+    return address;
+}
+
+void s_insert() {
+    // insert identifier, address, and type into SYMBOL_TABLE
+    return;
+}
+
+void s_print() {
+    // output the SYMBOL_TABLE
+    return;
+}
+
+//--------------------------------------------------------------------------
+// Following is the procedure for generating assembly instructions
+//--------------------------------------------------------------------------
+
+void gen_instruction() {
+/*  
+    // for arguments (op, oprnd)
+    INSTR_TABLE [instr_address].address = inst_address;
+    INSTR_TABLE [instr_address].op = op;
+    INSTR_TABLE [instr_address].oprnd = oprnd;
+    instr_address++;
+*/
+// note, instr_address should begin at 1 NOT 0!!
+    return;
+}
+
+void back_patch(/*jump_addr aka instr_address*/) {
+/*
+    addr = pop_jumpstack();
+    Instr_table[addr].oprn = jump_addr;
+*/
 }
