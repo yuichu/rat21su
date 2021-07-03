@@ -2,22 +2,33 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stack>
+#include <iomanip>
 using namespace std;
 
 char separators[] = { '(', ')', '[', ']', '{', '}', ',', ':', ';' };
 char operators[] = { '*', '+', '-', '=', '/', '>', '<', '%', '|' };
 string keywords[13] = { "integer", "float", "boolean", "true", "false", "if", "else", "while", "put", "get", "begin", "end", "endif" };
 string INSTR_TABLE[400][3];  // assembly instruction
-string SYMBOL_TABLE[100][3]; // symbol table
+string SYMBOL_TABLE[100][2]; // symbol table
+stack<int> jumpstack;
 
 vector<char> buffer;
 ifstream inFile;
 ofstream outFile;
+ofstream outFile2;
 string token;
 string lexeme;
 bool printRule = true;
+
+
+int s_size = 0; //size of the symbol table
 int memory_address = 10000; // increment by one when a new identifier is declared and placed into the symbol table
-int instr_address = 1;
+string currId_type = "";
+string currId = "";
+int instr_address = 1; // increment after each new item in the instruction list
 
 int tokenizer(char currChar, int currState);
 // print(int state) -> prints token and lexeme
@@ -50,11 +61,12 @@ void r_termP();
 void r_factor();
 void r_primary();
 bool s_lookup();
-//int s_getAddress();
+int s_getAddress(string token);
 void s_insert();
 void s_print();
-void gen_instruction();
-void back_patch();
+void i_print();
+void gen_instruction(string op, int oprnd);
+void back_patch(int jump_addr);
 
 
 // FSM for identifier and integer tokens
@@ -106,7 +118,8 @@ int main(int argc, char* argv[])
     outFile.close();
 
     inFile.open("Tokens.txt");
-    outFile.open(argv[2]);
+    outFile.open("Parse.txt");
+    outFile2.open(argv[2]);
 
     cout << endl;
 
@@ -320,6 +333,11 @@ void r_rat21Su() {
     else {
         cout << "\n------- End of Rat21SU -------\n";
     }
+    cout << "\n\n";
+    i_print();
+    cout << "\n\n";
+    outFile2 << "\n\n";
+    s_print();
     return;
 }
 
@@ -331,9 +349,7 @@ void r_optDeclarationList() {
         outFile << "\t <Opt Declaration List> ::= <Declaration List>  |  <Empty>" << "\n";
     }
     if (lexeme != "%%" && !inFile.eof() && (lexeme == "integer" || lexeme == "boolean")) {
-
         r_declarationList();
-        // TO DO: Print out the Symbol Table
     }
     else {
         cout << "\t <Opt Declaration List> ::= <Empty>" << "\n";
@@ -351,8 +367,9 @@ void r_declarationList() {
     }
     r_declaration();
     if (lexeme == ";") {
+        // LOOKUP & INSERT TO SYMBOL TABLE
+        s_insert();
         lexer();
-        // TO DO: LOOKUP & INSERT TO SYMBOL TABLE 
         r_declarationListP();
     }
     else {
@@ -392,6 +409,7 @@ void r_declaration() {
     r_qualifier(); // <Qualifier>
 
     if (token == "Identifier") {    // <identifier>
+        currId = lexeme; // save token for symbol table
         lexer();
     }
     else {
@@ -416,6 +434,7 @@ void r_qualifier() {
             cout << "\t <Qualifier> ::= boolean" << "\n";
             outFile << "\t <Qualifier> ::= boolean" << "\n";
         }
+        currId_type = lexeme; // save token for symbol table
         lexer();
     }
     else {
@@ -443,7 +462,7 @@ void r_statementList() {
 
 // Rule 22: <Statement List P> ::= <Statement List>  |  %%
 void r_statementListP() {
-    if (lexeme != "%%") {
+    if (lexeme != "%%" && lexeme != "end") {
         if (printRule) {
             // print production rule
             cout << "\t <Statement List P> ::= <Statement List>" << "\n";
@@ -510,12 +529,6 @@ void r_statement() {
         }
         r_while();
     }
-    else if (lexeme == "end") {
-        lexer();
-    }
-    else if (lexeme == "endif") {
-        lexer();
-    }
     else {
         cout << "Rule 7 error: No valid statement begins for " << token << " " << lexeme << "\n";
         outFile << "Rule 7 error: No valid statement begins for " << token << " " << lexeme << "\n";
@@ -535,6 +548,9 @@ void r_compound() {
         lexer();
 
         r_statementList();  // <Statement List>
+        if (lexeme == "end") {
+            lexer();
+        }
 
     }
     else {
@@ -554,6 +570,7 @@ void r_assign() {
             cout << "\t <Assign> ::= <Identifier> = <Expression> ;" << "\n";
             outFile << "\t <Assign> ::= <Identifier> = <Expression> ;" << "\n";
         }
+        string save = lexeme;
 
         lexer();
 
@@ -562,7 +579,7 @@ void r_assign() {
 
             r_expression(); // <Expression>
 
-            // TO DO: get_instr (POPM, get_address (save) );
+            gen_instruction("POPM", s_getAddress(save));
 
             if (lexeme == ";") {
                 lexer();
@@ -593,6 +610,9 @@ void r_assign() {
 // Rule 10: <If> ::= if ( <Condition> ) <Statement> <If P>
 void r_if() {
     if (lexeme == "if") {
+
+        int addr = instr_address;
+
         if (printRule) {
             // print production rule
             cout << "\t <If> ::= if ( <Condition> ) <Statement> <If P>" << "\n";
@@ -609,6 +629,9 @@ void r_if() {
                 lexer();
 
                 r_statement();  // <Statement>
+
+                back_patch(instr_address);
+
                 r_ifP();    // <If P>
             }
             else {
@@ -641,18 +664,24 @@ void r_ifP() {
             // print production rule
             cout << "\t <If P> ::= endif" << "\n";
             outFile << "\t <If P> ::= endif" << "\n";
+            gen_instruction("LABEL", 0);
         }
         if (printRule && lexeme == "else")
         {
             // print production rule
             cout << "\t <If P> ::= else <Statement> endif" << "\n";
             outFile << "\t <If P> ::= else <Statement> endif" << "\n";
+            gen_instruction("LABEL", 0);
+            lexer();
+            r_statement();  // <Statement>
+            if (lexeme != "endif") {
+                // error
+                cout << "Rule 23 Error: expected endif\n";
+                outFile << "Rule 23 Error: expected endif\n";
+                exit(EXIT_FAILURE);
+            }
         }
         lexer();
-
-        if (lexeme == "else") {
-            r_statement();  // <Statement>
-        }
     }
     else {
         // error
@@ -677,6 +706,9 @@ void r_put() {
             lexer();
 
             if (token == "Identifier") {
+
+                string save = lexeme;
+
                 lexer();
 
                 if (lexeme == ")") {
@@ -684,6 +716,10 @@ void r_put() {
 
                     if (lexeme == ";") {
                         lexer();
+
+                        gen_instruction("PUSHM", s_getAddress(save));
+                        gen_instruction("STDOUT", 0);
+
                     }
                     else {
                         // error for ';'
@@ -736,6 +772,9 @@ void r_get() {
             lexer();
 
             if (token == "Identifier") {
+
+                string save = lexeme;
+
                 lexer();
 
                 if (lexeme == ")") {
@@ -743,6 +782,10 @@ void r_get() {
 
                     if (lexeme == ";") {
                         lexer();
+
+                        gen_instruction("STDIN", 0);
+                        gen_instruction("POPM", s_getAddress(save));
+
                     }
                     else {
                         // error for ';'
@@ -784,6 +827,11 @@ void r_get() {
 // Rule 13: <While> ::= while ( <Condition> ) <Statement>  
 void r_while() {
     if (lexeme == "while") {
+
+        int addr = instr_address;
+
+        gen_instruction("LABEL", 0);
+
         if (printRule) {
             // print production rule
             cout << "\t <While> ::= while ( <Condition> ) <Statement>" << "\n";
@@ -800,6 +848,10 @@ void r_while() {
                 lexer();
 
                 r_statement(); // <Statement>
+
+                // TODO: gen_instr(JUMP, addr);
+                gen_instruction("JUMP", addr);
+                back_patch(instr_address);
             }
             else {
                 // error for ')'
@@ -832,8 +884,27 @@ void r_condition() {
         outFile << "\t <Condition> ::= <Expression> <Relop> <Expression>" << "\n";
     }
     r_expression();
+    // If token is relop then
+    // TODO: op = token;
+    string op = lexeme;
     r_relop();
     r_expression();
+
+    if (op == "<") {
+        gen_instruction("LES", 0);
+        jumpstack.push(instr_address);  //another stack need
+        gen_instruction("JUMPZ", 0);
+    }
+    else if (op == ">") {
+        gen_instruction("GRT", 0);
+        jumpstack.push(instr_address);
+        gen_instruction("JUMPZ", 0);
+    }
+    else if (op == "==" || op == "/=") {
+        gen_instruction("EQU", 0);
+        jumpstack.push(instr_address);
+        gen_instruction("JUMPZ", 0);
+    }
     return;
 }
 
@@ -886,6 +957,7 @@ void r_expression() {
 // Rule 24: <Expression P> ::= + <Term> <Expression P>  |  - <Term> <Expression P>  |  <Empty>
 void r_expressionP() {
     if (lexeme == "+" || lexeme == "-") {
+        string save = lexeme;
         if (printRule && lexeme == "+") {
             // print production rule
             cout << "\t <Expression P> ::= + <Term> <Expression P>" << "\n";
@@ -899,6 +971,14 @@ void r_expressionP() {
         lexer();
 
         r_term();
+        if (save == "+") {
+            // gen_instr (ADD, nil);
+            gen_instruction("ADD", 0);
+        }
+        if (save == "-") {
+            gen_instruction("SUB", 0);
+        }
+
         r_expressionP();
     }
     else {
@@ -925,6 +1005,7 @@ void r_term() {
 // Rule 25: <Term P> ::= * <Factor> <Term P>   |   / <Factor> <Term P>   |   <Empty>
 void r_termP() {
     if (lexeme == "*" || lexeme == "/") {
+        string save = lexeme;
         if (printRule && lexeme == "*") {
             // print production rule
             cout << "\t <Term P> ::= * <Factor> <Term P>" << "\n";
@@ -938,6 +1019,15 @@ void r_termP() {
         lexer();
 
         r_factor();
+
+        if (save == "*") {
+            // TODO: gen_instr(MUL, nil);
+            gen_instruction("MUL", 0);
+        }
+        if (save == "/") {
+            gen_instruction("DIV", 0);
+        }
+
         r_termP();
     }
     else {
@@ -967,6 +1057,11 @@ void r_factor() {
             cout << "\t <Factor> ::= <Primary>" << "\n";
             outFile << "\t <Factor> ::= <Primary>" << "\n";
         }
+
+        //if (token == "Identifier") {
+
+        //}
+
         r_primary();
     }
     else {
@@ -986,12 +1081,18 @@ void r_primary() {
             // print production rule
             cout << "\t <Primary> ::= <Identifier>" << "\n";
             outFile << "\t <Primary> ::= <Identifier>" << "\n";
+            // gen_instr(PUSHM,  get_address (token));
+            gen_instruction("PUSHM", s_getAddress(lexeme));
         }
         if (printRule && token == "Integer") {
             // print production rule
             cout << "\t <Primary> ::= <Integer>" << "\n";
             outFile << "\t <Primary> ::= <Integer>" << "\n";
+            int n;
+            n = stoi(lexeme);
+            gen_instruction("PUSHI", n);
         }
+
         lexer();
     }
     else if (lexeme == "true" || lexeme == "false") {
@@ -999,11 +1100,13 @@ void r_primary() {
             // print production rule
             cout << "\t <Primary> ::= true" << "\n";
             outFile << "\t <Primary> ::= true" << "\n";
+            gen_instruction("PUSHI", 1);
         }
         if (printRule && lexeme == "false") {
             // print production rule
             cout << "\t <Primary> ::= false" << "\n";
             outFile << "\t <Primary> ::= false" << "\n";
+            gen_instruction("PUSHI", 0);
         }
         lexer();
     }
@@ -1042,24 +1145,61 @@ void r_empty() {
 // Each function will begin with s_ to indicate that it's a symbol table procedure.
 //--------------------------------------------------------------------------
 
+// return true if identifier already exists
 bool s_lookup() {
-    // check if identifier already exists in SYMBOL_TABLE
-    return 0;   // return true if identifier already exists
+    for (int i = 0; i < s_size; i++) {
+        if (currId == SYMBOL_TABLE[i][0])
+            return 1;
+    }
+    return 0;
 }
 
-//int s_getAddress(/*token*/) {
-//    int address;
-//    // return address of identifier from SYMBOL_TABLE
-//    return address;
-//}
+// return address of identifier from SYMBOL_TABLE
+int s_getAddress(string token) {
+    for (int i = 0; i < s_size; i++) {
+        if (token == SYMBOL_TABLE[i][0])
+            return i + 10000;
+    }
+    cout << "s_getAddress() error: Token " << token << " does not exist in the symbol table.\n";
+    exit(EXIT_FAILURE);
+}
 
+// insert identifier, address, and type into SYMBOL_TABLE
 void s_insert() {
-    // insert identifier, address, and type into SYMBOL_TABLE
+    if (s_lookup() == 0) {
+        SYMBOL_TABLE[s_size][0] = currId;
+        SYMBOL_TABLE[s_size][1] = currId_type;
+        s_size++;
+    }
+    else {
+        cout << "Indentifier already exists in the table. The same identifier cannot be declared more than once.\n";
+        exit(EXIT_FAILURE);
+    }
+}
+
+// output symbol table
+void s_print() {
+    cout << "             SYMBOL TABLE         \n\n";
+    cout << left;
+    cout << setw(15) << "Identifier" << setw(18) << "Memory Location" << setw(8) << "Type" << endl;
+    outFile2 << "             SYMBOL TABLE         \n\n";
+    outFile2 << left;
+    outFile2 << setw(15) << "Identifier" << setw(18) << "Memory Location" << setw(8) << "Type" << endl;
+    for (int i = 0; i < s_size; i++) {
+        cout << setw(15) << SYMBOL_TABLE[i][0] << setw(18) << i + 10000 << SYMBOL_TABLE[i][1] << endl;
+        outFile2 << setw(15) << SYMBOL_TABLE[i][0] << setw(18) << i + 10000 << SYMBOL_TABLE[i][1] << endl;
+    }
     return;
 }
 
-void s_print() {
-    // output the SYMBOL_TABLE
+// ouput assembly instructions
+void i_print() {
+    cout << "Assembly Instructions\n\n";
+    outFile2 << "Assembly Instructions\n\n";
+    for (int i = 1; i < instr_address; i++) {
+        cout << left << setw(6) << INSTR_TABLE[i][0] << setw(10) << INSTR_TABLE[i][1] << INSTR_TABLE[i][2] << endl;
+        outFile2 << left << setw(6) << INSTR_TABLE[i][0] << setw(10) << INSTR_TABLE[i][1] << INSTR_TABLE[i][2] << endl;
+    }
     return;
 }
 
@@ -1067,21 +1207,25 @@ void s_print() {
 // Following is the procedure for generating assembly instructions
 //--------------------------------------------------------------------------
 
-void gen_instruction() {
-    /*
-        // for arguments (op, oprnd)
-        INSTR_TABLE [instr_address].address = inst_address;
-        INSTR_TABLE [instr_address].op = op;
-        INSTR_TABLE [instr_address].oprnd = oprnd;
-        instr_address++;
-    */
+void gen_instruction(string op, int oprnd) {
+
+    string s_instr_address = to_string(instr_address); // This conversion prolly works but idk ill check later
+    string s_oprnd = to_string(oprnd);
+    INSTR_TABLE[instr_address][0] = s_instr_address;
+    INSTR_TABLE[instr_address][1] = op;
+    if (op == "STDIN" || op == "STDOUT" || op == "ADD" || op == "SUB" || op == "MUL" || op == "DIV" || op == "GRT" || op == "LES" || op == "EQU" || op == "JUMPZ" || op == "LABEL")
+        INSTR_TABLE[instr_address][2] = "";
+    else
+        INSTR_TABLE[instr_address][2] = s_oprnd;
+    instr_address++;
+
     // note, instr_address should begin at 1 NOT 0!!
     return;
 }
-
-void back_patch(/*jump_addr aka instr_address*/) {
-    /*
-        addr = pop_jumpstack();
-        Instr_table[addr].oprn = jump_addr;
-    */
+// set JUMPZ operand
+void back_patch(int jump_addr) {
+    int addr = 0;
+    addr = jumpstack.top();
+    jumpstack.pop();
+    INSTR_TABLE[addr][2] = to_string(jump_addr);
 }
