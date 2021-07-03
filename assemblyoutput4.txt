@@ -1,0 +1,58 @@
+Assembly Instructions
+
+1     PUSHI     10
+2     PUSHI     1
+3     ADD       
+4     POPM      10000
+5     PUSHI     0
+6     POPM      10001
+7     PUSHI     1
+8     POPM      10002
+9     PUSHI     0
+10    POPM      10003
+11    PUSHI     0
+12    POPM      10004
+13    LABEL     
+14    PUSHM     10004
+15    PUSHM     10000
+16    LES       
+17    JUMPZ     47
+18    PUSHM     10004
+19    PUSHI     1
+20    EQU       
+21    JUMPZ     24
+22    PUSHM     10001
+23    STDOUT    
+24    LABEL     
+25    PUSHM     10004
+26    PUSHI     2
+27    EQU       
+28    JUMPZ     31
+29    PUSHM     10002
+30    STDOUT    
+31    LABEL     
+32    PUSHM     10001
+33    PUSHM     10002
+34    ADD       
+35    POPM      10003
+36    PUSHM     10002
+37    POPM      10001
+38    PUSHM     10003
+39    POPM      10002
+40    PUSHM     10003
+41    STDOUT    
+42    PUSHM     10004
+43    PUSHI     1
+44    ADD       
+45    POPM      10004
+46    JUMP      13
+
+
+             SYMBOL TABLE         
+
+Identifier     Memory Location   Type    
+n              10000             integer
+t1             10001             integer
+t2             10002             integer
+nextT          10003             integer
+i              10004             integer

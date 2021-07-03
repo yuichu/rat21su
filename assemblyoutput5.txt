@@ -1,0 +1,37 @@
+Assembly Instructions
+
+1     PUSHI     834
+2     POPM      10000
+3     PUSHI     4
+4     POPM      10001
+5     LABEL     
+6     PUSHM     10000
+7     PUSHM     10001
+8     EQU       
+9     JUMPZ     24
+10    PUSHM     10000
+11    PUSHM     10001
+12    GRT       
+13    JUMPZ     18
+14    PUSHM     10000
+15    PUSHM     10001
+16    SUB       
+17    POPM      10000
+18    LABEL     
+19    PUSHM     10001
+20    PUSHM     10000
+21    SUB       
+22    POPM      10001
+23    JUMP      5
+24    PUSHM     10000
+25    POPM      10002
+26    PUSHM     10002
+27    STDOUT    
+
+
+             SYMBOL TABLE         
+
+Identifier     Memory Location   Type    
+num1           10000             integer
+num2           10001             integer
+gcd            10002             integer

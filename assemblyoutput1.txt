@@ -1,0 +1,20 @@
+Assembly Instructions
+
+1     PUSHI     50
+2     POPM      10000
+3     PUSHI     2
+4     POPM      10001
+5     PUSHM     10000
+6     POPM      10002
+7     PUSHM     10001
+8     POPM      10000
+9     PUSHM     10002
+10    POPM      10001
+
+
+             SYMBOL TABLE         
+
+Identifier     Memory Location   Type    
+a              10000             integer
+b              10001             integer
+temp           10002             integer
